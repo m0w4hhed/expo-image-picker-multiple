@@ -63,7 +63,12 @@ export default class ImageBrowser extends React.Component {
     if (newSelected.length > this.props.max) return;
     if (!newSelected) newSelected = [];
     this.setState({selected: newSelected});
-    this.props.onChange(newSelected.length, () => this.prepareCallback());
+    this.props.onChange(newSelected.length, () => {
+      const { photos } = this.state;
+      const selectedPhotos = newSelected.map(i => photos[i]);
+      const assetsInfo = Promise.all(selectedPhotos.map(i => MediaLibrary.getAssetInfoAsync(i)));
+      this.props.callback(assetsInfo);
+    });
   }
 
   getPhotos = () => {
@@ -98,12 +103,12 @@ export default class ImageBrowser extends React.Component {
     return {length, offset: length * index, index};
   }
 
-  prepareCallback() {
-    const { selected, photos } = this.state;
-    const selectedPhotos = selected.map(i => photos[i]);
-    const assetsInfo = Promise.all(selectedPhotos.map(i => MediaLibrary.getAssetInfoAsync(i)));
-    this.props.callback(assetsInfo);
-  }
+//   prepareCallback() {
+//     const { selected, photos } = this.state;
+//     const selectedPhotos = selected.map(i => photos[i]);
+//     const assetsInfo = Promise.all(selectedPhotos.map(i => MediaLibrary.getAssetInfoAsync(i)));
+//     this.props.callback(assetsInfo);
+//   }
 
   renderImageTile = ({item, index}) => {
     const selected = this.state.selected.indexOf(index) !== -1;
